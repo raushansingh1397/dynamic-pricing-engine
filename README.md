@@ -665,7 +665,7 @@ erDiagram
     }
 
     INVENTORY {
-        int prod_id PK FK
+        int prod_id PK
         int prod_count
     }
 
@@ -709,8 +709,8 @@ erDiagram
     }
 
     COMP_PRICING {
-        int prod_id PK FK
-        int comp_id PK FK
+        int prod_id PK
+        int comp_id PK
         decimal price
         timestamp fetched_at
     }
