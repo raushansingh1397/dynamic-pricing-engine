@@ -43,11 +43,12 @@ public class ProductService {
         existing.setProdCategory(product.getProdCategory());
         existing.setProdCompanyName(product.getProdCompanyName());
         existing.setBasePrice(product.getBasePrice());
-        existing.setDiscountedPrice(product.getDiscountedPrice());
-        Product prod = repo.save(existing);
+
         if(product.getDiscountedPrice() !=  null && !product.getDiscountedPrice().equals(existing.getDiscountedPrice())){
             priceService.recordPriceChange(prodId,product.getCurrentDynamicPrice(),Constants.MANUAL);
         }
+        existing.setDiscountedPrice(product.getDiscountedPrice());
+        Product prod = repo.save(existing);
         return ProductDTO.createProdObj(prod, prod.getInventory());
     }
 
