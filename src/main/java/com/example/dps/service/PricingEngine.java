@@ -9,6 +9,7 @@ import tools.jackson.databind.ObjectMapper;
 
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -40,10 +41,11 @@ public class PricingEngine {
     }
 
     public BigDecimal applyRules(BigDecimal base, RuleContext context,List<Rules> activeRules){
+        List<Rules> sortableRules = new ArrayList<>(activeRules);
         BigDecimal price = base;
-        activeRules.sort(Comparator.comparing(Rules::getPriority));
+        sortableRules.sort(Comparator.comparing(Rules::getPriority));
 
-        for(Rules rule: activeRules){
+        for(Rules rule: sortableRules){
             if(evaluateCondition(rule,context)){
                 price = applyAction(rule,price);
             }
