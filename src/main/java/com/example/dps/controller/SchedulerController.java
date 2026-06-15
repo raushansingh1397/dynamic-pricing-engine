@@ -1,6 +1,7 @@
 package com.example.dps.controller;
 
 import com.example.dps.service.SchedulerService;
+import com.example.dps.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class SchedulerController {
     @PostMapping("/trigger")
     public ResponseEntity<String> scheduleDynamicPricing(){
         log.info("Manual pricing triggered initiated");
-        service.scheduleDynamicPricing();
+        service.scheduleDynamicPricing(Constants.MANUAL);
         log.info("Manual Pricing triggered completed");
         return ResponseEntity.ok("Scheduler started successfully");
     }

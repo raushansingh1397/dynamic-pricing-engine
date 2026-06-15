@@ -3,6 +3,7 @@ package com.example.dps.service;
 import com.example.dps.dto.JobDTO;
 import com.example.dps.entity.Product;
 import com.example.dps.repository.ProductRepo;
+import com.example.dps.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,8 +31,9 @@ public class SchedulerService {
         this.productRepo = productRepo;
     }
 
-    @Scheduled(fixedRate = 3600000)
-    public void scheduleDynamicPricing(){
+    @Scheduled(fixedRateString = "${pricing.scheduler.interval:3600000}")
+    public void scheduleDynamicPricing(String trigger){
+        String triggeredBy = Constants.SCHEDULER;
         List<JobDTO> list = new ArrayList<>();
         JobDTO job = new JobDTO();
         int productsUpdated = 0;
@@ -39,7 +41,10 @@ public class SchedulerService {
         for(Product dto:activeProductList){
             try{
                 BigDecimal price = pricingEngine.calculateDynamicPrice(dto);
-                productService.updateProductPrice(dto.getProdId(),price);
+                if(trigger != null) {
+                    triggeredBy = trigger;
+                }
+                productService.updateProductPrice(dto.getProdId(),price,triggeredBy);
                 productsUpdated++;
 
             } catch (Exception e){

@@ -8,7 +8,7 @@ import com.example.dps.exception.ConflictException;
 import com.example.dps.exception.ResourceNotFoundException;
 import com.example.dps.repository.PriceHistoryRepo;
 import com.example.dps.repository.ProductRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,17 +17,11 @@ import java.util.List;
 
 
 @Service
+@AllArgsConstructor
 public class PriceHistoryService {
     private final ProductRepo productRepo;
     private final PriceHistoryRepo repo;
     private final CompPricingService compService;
-
-    @Autowired
-    public PriceHistoryService(ProductRepo productRepo, PriceHistoryRepo repo, CompPricingService compService) {
-        this.productRepo = productRepo;
-        this.repo = repo;
-        this.compService = compService;
-    }
 
     public void recordPriceChange(int prodId, BigDecimal newPrice, String triggeredBy){
          PriceHistory priceHistory = new PriceHistory();
