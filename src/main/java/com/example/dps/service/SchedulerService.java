@@ -3,6 +3,7 @@ package com.example.dps.service;
 import com.example.dps.dto.JobDTO;
 import com.example.dps.entity.Product;
 import com.example.dps.repository.ProductRepo;
+import com.example.dps.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,7 +31,7 @@ public class SchedulerService {
         this.productRepo = productRepo;
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRateString = "${pricing.scheduler.interval:3600000}")
     public void scheduleDynamicPricing(){
         List<JobDTO> list = new ArrayList<>();
         JobDTO job = new JobDTO();
