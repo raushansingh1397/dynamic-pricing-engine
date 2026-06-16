@@ -32,8 +32,7 @@ public class SchedulerService {
     }
 
     @Scheduled(fixedRateString = "${pricing.scheduler.interval:3600000}")
-    public void scheduleDynamicPricing(String trigger){
-        String triggeredBy = Constants.SCHEDULER;
+    public void scheduleDynamicPricing(){
         List<JobDTO> list = new ArrayList<>();
         JobDTO job = new JobDTO();
         int productsUpdated = 0;
@@ -41,10 +40,7 @@ public class SchedulerService {
         for(Product dto:activeProductList){
             try{
                 BigDecimal price = pricingEngine.calculateDynamicPrice(dto);
-                if(trigger != null) {
-                    triggeredBy = trigger;
-                }
-                productService.updateProductPrice(dto.getProdId(),price,triggeredBy);
+                productService.updateProductPrice(dto.getProdId(),price);
                 productsUpdated++;
 
             } catch (Exception e){

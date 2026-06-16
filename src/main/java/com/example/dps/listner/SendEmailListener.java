@@ -19,8 +19,7 @@ public class SendEmailListener {
         // Simulate sending an email
         log.info("Sending email notification for product ID: {}. Price changed from {} to {} triggered by: {}",
                  event.productId(), event.oldPrice(), event.newPrice(), event.triggeredBy());
-        // Here you would integrate with an actual email service to send the email
-        //TODO: Implement email sending logic using JavaMailSender or any other email service
+
         mailService.sendEmail(event.productId(), event.oldPrice(), event.newPrice(), event.triggeredBy());
     }
 }

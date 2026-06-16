@@ -23,7 +23,7 @@ public class SchedulerController {
     @PostMapping("/trigger")
     public ResponseEntity<String> scheduleDynamicPricing(){
         log.info("Manual pricing triggered initiated");
-        service.scheduleDynamicPricing(Constants.MANUAL);
+        service.scheduleDynamicPricing();
         log.info("Manual Pricing triggered completed");
         return ResponseEntity.ok("Scheduler started successfully");
     }

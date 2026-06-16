@@ -66,12 +66,12 @@ public class ProductService {
         return ProductDTO.createProdObj(prod,prod.getInventory());
     }
 
-    public void updateProductPrice(int prodId,BigDecimal newPrice, String triggeredBy){
+    public void updateProductPrice(int prodId,BigDecimal newPrice){
         Product prod = repo.findById(prodId).orElseThrow(()-> new ResourceNotFoundException("No such record found"));
         BigDecimal oldPrice = prod.getCurrentDynamicPrice();
         prod.setCurrentDynamicPrice(newPrice);
         repo.save(prod);
-        eventPublisher.publishEvent(new PriceChangeEvent(this, prodId,newPrice, oldPrice,prod.getBasePrice(), triggeredBy));
+        eventPublisher.publishEvent(new PriceChangeEvent(this, prodId,newPrice, oldPrice,prod.getBasePrice(), Constants.SCHEDULER));
 //        priceService.recordPriceChange(prodId,newPrice, Constants.SCHEDULER);
     }
 
