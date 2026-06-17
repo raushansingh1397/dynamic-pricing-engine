@@ -10,6 +10,9 @@ import com.example.dps.repository.ProductRepo;
 import com.example.dps.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
@@ -51,14 +54,10 @@ public class ProductService {
         return ProductDTO.createProdObj(prod, prod.getInventory());
     }
 
-    public List<ProductDTO> getAllProducts(){
-        List<Product> products = repo.findAllActiveProducts();
-        List<ProductDTO> productDTOS = new ArrayList<>();
-        for(Product prod: products){
-            ProductDTO obj = ProductDTO.createProdObj(prod, prod.getInventory());
-            productDTOS.add(obj);
-        }
-        return productDTOS;
+    public Page<ProductDTO> getAllProducts(int pageNumber,int size){
+        Pageable pageable = PageRequest.of(pageNumber,size);
+        Page<Product> products = repo.findAllActiveProducts(pageable);
+        return products.map(prod->ProductDTO.createProdObj(prod,prod.getInventory()));
     }
 
     public ProductDTO getProductById(Integer prodId){

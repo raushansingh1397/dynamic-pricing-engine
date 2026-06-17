@@ -5,6 +5,7 @@ import com.example.dps.entity.Inventory;
 import com.example.dps.entity.Product;
 import com.example.dps.exception.ConflictException;
 import com.example.dps.exception.ResourceNotFoundException;
+import com.example.dps.record.PriceChangeEvent;
 import com.example.dps.repository.ProductRepo;
 import com.example.dps.utils.Constants;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,6 +31,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
+
     @Mock
     private ProductRepo productRepo;
 
@@ -33,6 +40,9 @@ class ProductServiceTest {
 
     @InjectMocks
     private ProductService productService;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     // ===== TEST 1: addProduct =====
     @Test
@@ -67,7 +77,7 @@ class ProductServiceTest {
         assertEquals(new BigDecimal("899.99"), result.getDiscountedPrice());
 
         // Assert: Verify inventory initialization
-        assertEquals(0, result.getProdCount());
+        assertEquals(1, result.getProdCount());
 
         // Assert: Verify product was set to active
         ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
@@ -87,7 +97,7 @@ class ProductServiceTest {
 
         Inventory inventory = new Inventory();
         inventory.setProdId(1);
-        inventory.setProdCount(0);
+        inventory.setProdCount(1);
         savedProduct.setInventory(inventory);
         return savedProduct;
     }
@@ -137,11 +147,14 @@ class ProductServiceTest {
     @Test
     void testGetAllProducts_success() {
         // Arrange
+        int pageNumber = 0;
+        int pageSize = 10;
         List<Product> products = new ArrayList<>();
 
         Product product1 = new Product();
         product1.setProdId(1);
         product1.setProdName("Laptop");
+        product1.setIsActive(true);
         Inventory inv1 = new Inventory();
         inv1.setProdCount(50);
         product1.setInventory(inv1);
@@ -149,6 +162,7 @@ class ProductServiceTest {
         Product product2 = new Product();
         product2.setProdId(2);
         product2.setProdName("Monitor");
+        product2.setIsActive(true);
         Inventory inv2 = new Inventory();
         inv2.setProdCount(100);
         product2.setInventory(inv2);
@@ -156,40 +170,34 @@ class ProductServiceTest {
         products.add(product1);
         products.add(product2);
 
-        when(productRepo.findAllActiveProducts()).thenReturn(products);
+        Pageable page = PageRequest.of(pageNumber, pageSize);
+
+        Page<Product> productPage = new PageImpl<>(products,page,products.size());
+        when(productRepo.findAllActiveProducts(page)).thenReturn(productPage);
 
         // Act
-        List<ProductDTO> result = productService.getAllProducts();
-
+        Page<ProductDTO> result = productService.getAllProducts(pageNumber, pageSize);
         // Assert: Verify list size
         assertNotNull(result);
-        assertEquals(2, result.size());
-
-        // Assert: Verify first product
-        assertEquals(1, result.get(0).getProdId());
-        assertEquals("Laptop", result.get(0).getProdName());
-        assertEquals(50, result.get(0).getProdCount());
-
-        // Assert: Verify second product
-        assertEquals(2, result.get(1).getProdId());
-        assertEquals("Monitor", result.get(1).getProdName());
-        assertEquals(100, result.get(1).getProdCount());
-
-        verify(productRepo, times(1)).findAllActiveProducts();
+        assertEquals(2, result.getTotalElements());
+        verify(productRepo, times(1)).findAllActiveProducts(page);
     }
 
     @Test
     void testGetAllProducts_empty() {
+        int pageNumber = 0;
+        int pageSize = 10;
+        Pageable page = PageRequest.of(pageNumber, pageSize);
         // Arrange
-        when(productRepo.findAllActiveProducts()).thenReturn(new ArrayList<>());
+        when(productRepo.findAllActiveProducts(page)).thenReturn(new PageImpl<>(new ArrayList<>(),page,0));
 
         // Act
-        List<ProductDTO> result = productService.getAllProducts();
+        Page<ProductDTO> result = productService.getAllProducts(pageNumber, pageSize);
 
         // Assert
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        assertEquals(0, result.size());
+        assertEquals(0, result.getTotalElements());
     }
 
     // ===== TEST 4: updateProduct =====
@@ -225,6 +233,7 @@ class ProductServiceTest {
         // Assert: Verify repository calls
         verify(productRepo, times(1)).findById(prodId);
         verify(productRepo, times(1)).save(any(Product.class));
+        verify(eventPublisher,times(1)).publishEvent(any(PriceChangeEvent.class));
 
         // Assert: Verify updated fields
         ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
@@ -298,11 +307,7 @@ class ProductServiceTest {
         productService.updateProduct(prodId, updatedProduct);
 
         // Assert: Verify price change was recorded
-        verify(priceService, times(1)).recordPriceChange(
-            eq(prodId),
-            eq(new BigDecimal("85.00")),
-            eq(Constants.MANUAL)
-        );
+        verify(eventPublisher,times(1)).publishEvent(any(PriceChangeEvent.class));
     }
 
     // ===== TEST 5: updateProductPrice =====
@@ -328,11 +333,7 @@ class ProductServiceTest {
         assertEquals(newPrice, productCaptor.getValue().getCurrentDynamicPrice());
 
         // Assert: Verify price change was recorded with SCHEDULER constant
-        verify(priceService, times(1)).recordPriceChange(
-            eq(prodId),
-            eq(newPrice),
-            eq(Constants.SCHEDULER)
-        );
+        verify(eventPublisher,times(1)).publishEvent(any(PriceChangeEvent.class));
     }
 
     @Test

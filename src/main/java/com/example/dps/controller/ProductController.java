@@ -3,8 +3,10 @@ package com.example.dps.controller;
 import com.example.dps.dto.ProductDTO;
 import com.example.dps.entity.Product;
 import com.example.dps.service.ProductService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +23,9 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping
-    public ResponseEntity<?> fetchAllAvailableProducts(){
-        List<ProductDTO> dto = productService.getAllProducts();
+    @GetMapping()
+    public ResponseEntity<?> fetchAllAvailableProducts(@RequestParam(value = "pageNumber",defaultValue = "0") int pageNumber, @RequestParam(value = "size",defaultValue = "10") int size){
+        Page<ProductDTO> dto = productService.getAllProducts(pageNumber,size);
         log.info("product list {}",dto);
         return ResponseEntity.ok(dto);
 
