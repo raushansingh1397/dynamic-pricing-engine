@@ -1,5 +1,7 @@
 package com.example.dps.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +24,6 @@ public class CompPricing {
     @ManyToOne
     @JoinColumn(name="prod_id",insertable = false,updatable = false)
     private Product product;
-
     @MapsId("compId")
     @ManyToOne
     @JoinColumn(name = "comp_id",insertable = false,updatable = false)

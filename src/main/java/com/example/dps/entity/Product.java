@@ -1,5 +1,8 @@
 package com.example.dps.entity;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +31,7 @@ public class Product {
     private Boolean isActive;
 
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+
     private Inventory inventory;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<PriceHistory> priceHistories;
