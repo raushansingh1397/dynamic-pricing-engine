@@ -167,7 +167,7 @@ public class PricingEngineTest {
         when(trackDemandService.getProdDemands(1)).thenReturn(Collections.emptyList());
         when(inventoryService.getStockCount(1)).thenReturn(5);  // Low stock
 
-        // Rule: if stockCount < 10, multiply by 1.20
+        // Rule: if stockCount < 10, set price to 1.20
         Rules rule = new Rules();
         rule.setRuleCondition("{\"field\":\"stockCount\",\"operator\":\"LT\",\"value\":10}");
         rule.setActionName("SET");
@@ -184,7 +184,7 @@ public class PricingEngineTest {
         // effectiveBase = min(100, 80) = 80
         // Rule: stockCount (5) < 10 = TRUE, apply SET 1.20
         // price = 1.20
-        // applyPriceBound(1.20, 100) = 1.20 (within 80-150)
+        // applyPriceBound(1.20, 100) floor=80, ceil=150 => max(1.20, 80) = 80
         assertEquals(new BigDecimal("80.000"), dynamicPrice);
     }
 
@@ -200,7 +200,7 @@ public class PricingEngineTest {
         when(trackDemandService.getProdDemands(1)).thenReturn(Collections.emptyList());
         when(inventoryService.getStockCount(1)).thenReturn(5);  // Low stock
 
-        // Rule: if stockCount < 10, multiply by 1.20
+        // Rule: if competitorDiff < 10, multiply by 1.20
         Rules rule = new Rules();
         rule.setRuleCondition("{\"field\":\"competitorDiff\",\"operator\":\"LT\",\"value\":10}");
         rule.setActionName("MULTIPLY");
@@ -215,7 +215,7 @@ public class PricingEngineTest {
 
         // Assert
         // effectiveBase = min(100, 80) = 80
-        // Rule: stockCount (5) < 10 = TRUE, apply MULTIPLY 1.20
+        // Rule: competitorDiff (0) < 10 = TRUE, apply MULTIPLY 1.20
         // price = 80 * 1.20 = 96.00
         // applyPriceBound(96.00, 100) = 96.00 (within 80-150)
         assertEquals(new BigDecimal("96.0000"), dynamicPrice);

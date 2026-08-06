@@ -1,7 +1,5 @@
 package com.example.dps.service;
 
-import com.example.dps.dto.EmailDTO;
-import com.example.dps.entity.PriceAlert;
 import com.example.dps.repository.PriceAlertRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

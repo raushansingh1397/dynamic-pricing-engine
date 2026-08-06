@@ -1,5 +1,7 @@
 package com.example.dps.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +23,7 @@ public class PriceHistory {
     private Integer historyId;
     @ManyToOne
     @JoinColumn(name = "prod_id")
+
     private Product product;
     @Column(precision = 10, scale = 2)
     private BigDecimal basePrice;
