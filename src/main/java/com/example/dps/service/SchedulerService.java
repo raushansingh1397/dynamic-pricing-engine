@@ -26,7 +26,9 @@ public class SchedulerService {
     private final ProductService productService;
     private final JobLogService jobLogService;
     private final ProductRepo productRepo;
-    private final EntityManager entityManager;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Scheduled(fixedRateString = "${pricing.scheduler.interval:3600000}")
     @Transactional
